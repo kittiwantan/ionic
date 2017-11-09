@@ -1792,12 +1792,34 @@ declare global {
     }
   }
   namespace JSXElements {
-    export interface IonNavAttributes extends HTMLAttributes {
-      
-        mode?: string,
-        root?: any,
-        delegate?: FrameworkDelegate
-    }
+      export interface IonNavAttributes extends HTMLAttributes {
+          mode?: string,
+          color?: string,
+        
+          push?: any,
+          pop?: any,
+          setRoot?: any,
+          insert?: any,
+          insertPages?: any,
+          popToRoot?: any,
+          popTo?: any,
+          removeIndex?: any,
+          removeView?: any,
+          setPages?: any,
+          getActive?: any,
+          getPrevious?: any,
+          canGoBack?: any,
+          canSwipeBack?: any,
+          getFirstView?: any,
+          resize?: any,
+          addRoute?: any,
+          removeRoute?: any,
+          getState?: any,
+          setRouteId?: any,
+          getRoutes?: any,
+          root?: any,
+          delegate?: any
+      }
   }
 }
 
@@ -2391,21 +2413,25 @@ declare global {
     }
   }
   namespace JSXElements {
-    export interface IonRouteAttributes extends HTMLAttributes {
-      
-        url?: string,
-        component?: string,
-        componentProps?: any,
-        router?: any
-    }
+      export interface IonRouteAttributes extends HTMLAttributes {
+          mode?: string,
+          color?: string,
+        
+          path?: string,
+          component?: string,
+          props?: any
+      }
   }
 }
 
+import { RouterController as IonRouterController } from './components/router/router-controller';
 
-import {
-  Router as IonRouter
-} from './components/router/router';
-
+interface HTMLIonRouterControllerElement extends IonRouterController, HTMLElement {
+}
+declare var HTMLIonRouterControllerElement: {
+  prototype: HTMLIonRouterControllerElement;
+  new (): HTMLIonRouterControllerElement;
+};
 declare global {
   interface HTMLIonRouterElement extends IonRouter, HTMLElement {
   }
@@ -2414,22 +2440,24 @@ declare global {
     new (): HTMLIonRouterElement;
   };
   interface HTMLElementTagNameMap {
-    "ion-router": HTMLIonRouterElement;
+      "ion-router-controller": HTMLIonRouterControllerElement;
   }
   interface ElementTagNameMap {
-    "ion-router": HTMLIonRouterElement;
+      "ion-router-controller": HTMLIonRouterControllerElement;
   }
   namespace JSX {
-    interface IntrinsicElements {
-      "ion-router": JSXElements.IonRouterAttributes;
-    }
+      interface IntrinsicElements {
+          "ion-router-controller": JSXElements.IonRouterControllerAttributes;
+      }
   }
   namespace JSXElements {
-    export interface IonRouterAttributes extends HTMLAttributes {
-      
-        root?: string,
-        match?: any
-    }
+      export interface IonRouterControllerAttributes extends HTMLAttributes {
+          mode?: string,
+          color?: string,
+        
+          fragment?: boolean,
+          base?: string
+      }
   }
 }
 
@@ -3007,21 +3035,25 @@ declare global {
     }
   }
   namespace JSXElements {
-    export interface IonTabAttributes extends HTMLAttributes {
-      
-        btnId?: string,
-        root?: any,
-        rootParams?: any,
-        urlPath?: string,
-        title?: string,
-        icon?: string,
-        badge?: string,
-        badgeStyle?: string,
-        enabled?: boolean,
-        show?: boolean,
-        tabsHideOnSubPages?: boolean,
-        selected?: boolean
-    }
+      export interface IonTabAttributes extends HTMLAttributes {
+          mode?: string,
+          color?: string,
+        
+          _setActive?: any,
+          goToRoot?: any,
+          getActive?: any,
+          getNav?: any,
+          btnId?: string,
+          path?: string,
+          title?: string,
+          icon?: string,
+          badge?: string,
+          badgeStyle?: string,
+          enabled?: boolean,
+          show?: boolean,
+          tabsHideOnSubPages?: boolean,
+          selected?: boolean
+      }
   }
 }
 
@@ -3049,14 +3081,24 @@ declare global {
     }
   }
   namespace JSXElements {
-    export interface IonTabsAttributes extends HTMLAttributes {
-      
-        name?: string,
-        tabbarHidden?: boolean,
-        tabbarLayout?: string,
-        tabbarPlacement?: string,
-        tabbarHighlight?: boolean
-    }
+      export interface IonTabsAttributes extends HTMLAttributes {
+          mode?: string,
+          color?: string,
+        
+          select?: any,
+          getByIndex?: any,
+          getSelected?: any,
+          getIndex?: any,
+          getTabs?: any,
+          getState?: any,
+          getRoutes?: any,
+          setRouteId?: any,
+          name?: string,
+          tabbarHidden?: boolean,
+          tabbarLayout?: string,
+          tabbarPlacement?: string,
+          tabbarHighlight?: boolean
+      }
   }
 }
 

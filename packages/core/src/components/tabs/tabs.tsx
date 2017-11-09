@@ -1,5 +1,5 @@
 import { Component, Element, Event, EventEmitter, Listen, Method, Prop, State } from '@stencil/core';
-import { Config } from '../../index';
+import { Config, NavState, RouterEntries } from '../../index';
 
 export interface NavOptions { }
 // import { isPresent } from '../../utils/helpers';
@@ -148,7 +148,6 @@ export class Tabs {
 
   private ids: number = -1;
   private tabsId: number = (++tabIds);
-  private selectHistory: string[] = [];
 
   @Element() el: HTMLElement;
 
@@ -186,11 +185,13 @@ export class Tabs {
    * @output {any} Emitted when the tab changes.
    */
   @Event() ionChange: EventEmitter;
+  @Event() ionNavChanged: EventEmitter;
 
   protected ionViewDidLoad() {
     this.loadConfig('tabsPlacement', 'bottom');
     this.loadConfig('tabsLayout', 'icon-top');
     this.loadConfig('tabsHighlight', true);
+
 
     // TODO: handle navigation parent
     //   if (this.parent) {
@@ -215,8 +216,9 @@ export class Tabs {
     //     viewCtrl._setContentRef(elementRef);
     //   }
     // }
-
-    this.initTabs();
+    if (Context.useRouter !== true) {
+      this.initTabs();
+    }
   }
 
   protected ionViewDidUnload() {
@@ -251,10 +253,10 @@ export class Tabs {
    * @param {number|Tab} tabOrIndex Index, or the Tab instance, of the tab to select.
    */
   @Method()
-  select(tabOrIndex: number | HTMLIonTabElement) {
+  select(tabOrIndex: number | HTMLIonTabElement): Promise<any> {
     const selectedTab = (typeof tabOrIndex === 'number' ? this.getByIndex(tabOrIndex) : tabOrIndex);
     if (!selectedTab) {
-      return;
+      return Promise.resolve();
     }
 
     // Reset rest of tabs
@@ -265,23 +267,26 @@ export class Tabs {
     }
     selectedTab.selected = true;
 
+    // The same selected was selected
+    // we need to set root in the nested ion-nav if it exist
     if (this.selectedTab === selectedTab) {
-      selectedTab.goToRoot();
-    } else {
-      const promise = selectedTab._setActive(true);
-      const leavingTab = this.selectedTab;
-      if (leavingTab) {
-        promise.then(() => {
-          Context.dom.raf(() => {
-            leavingTab._setActive(false);
-          });
-        });
-      }
-      this.selectedTab = selectedTab;
-      this.selectHistory.push(selectedTab.id);
-      this.ionChange.emit(selectedTab);
+      return selectedTab.goToRoot();
     }
+
+    const leavingTab = this.selectedTab;
+    this.selectedTab = selectedTab;
+
+    let promise = selectedTab._setActive(true);
+    if (leavingTab) {
+      promise = promise.then(() => leavingTab._setActive(false));
+    }
+
+    return promise.then(() => {
+      this.ionChange.emit(selectedTab);
+      this.ionNavChanged.emit({ isPop: false });
+    });
   }
+
 
    /**
    * @param {number} index Index of the tab you want to get
@@ -325,7 +330,6 @@ export class Tabs {
     }
     selectedTab._setActive(true);
     this.selectedTab = selectedTab;
-    this.selectHistory.push(selectedTab.id);
   }
 
   private loadConfig(attrKey: string, fallback: any) {
@@ -335,32 +339,34 @@ export class Tabs {
     }
   }
 
-  /**
-   * Get the previously selected Tab which is currently not disabled or hidden.
-   * @param {boolean} trimHistory If the selection history should be trimmed up to the previous tab selection or not.
-   * @returns {HTMLIonTabElement}
-   */
   @Method()
-  previousTab(trimHistory: boolean = true): HTMLIonTabElement {
-    // walk backwards through the tab selection history
-    // and find the first previous tab that is enabled and shown
-    for (var i = this.selectHistory.length - 2; i >= 0; i--) {
-      var id = this.selectHistory[i];
-      var tab = this.tabs.find(t => t.id === id);
-      if (tab && tab.enabled && tab.show) {
-        if (trimHistory) {
-          this.selectHistory.splice(i + 1);
-        }
-        return tab;
-      }
+  getState(): NavState {
+    const selectedTab = this.getSelected();
+    if (!selectedTab) {
+      return null;
     }
-    return null;
+    return {
+      path: selectedTab.path,
+      focusNode: selectedTab
+    };
   }
 
   @Method()
-  resize() {
-    const tab = this.getSelected();
-    tab && tab.resize();
+  getRoutes(): RouterEntries {
+    return this.tabs.map(t => {
+      return {
+        path: t.path,
+        id: t
+      };
+    });
+  }
+
+  @Method()
+  setRouteId(id: any, _: any = {}): Promise<void> {
+    if (this.selectedTab === id) {
+      return Promise.resolve();
+    }
+    return this.select(id);
   }
 
   protected render() {

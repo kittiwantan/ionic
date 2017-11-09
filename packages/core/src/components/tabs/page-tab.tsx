@@ -1,5 +1,10 @@
 import { Component, Element } from '@stencil/core';
 
+export interface Route {
+  path: string | null;
+  component: string;
+}
+
 @Component({
   tag: 'page-tab'
 })

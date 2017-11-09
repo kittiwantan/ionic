@@ -12,6 +12,8 @@ if (!Context.dom) {
   Context.dom = createDomControllerClient(window, now);
 }
 
+Context.useRouter = true;
+
 // create the Ionic.config from raw config object (if it exists)
 // and convert Ionic.config into a ConfigApi that has a get() fn
 Context.config = createConfigController(
